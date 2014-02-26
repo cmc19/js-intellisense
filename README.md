@@ -16,6 +16,9 @@ In previous versions of visual studio these where called vsdoc files. See [Micro
 
 * Chrome extension api documentation. 
 
+### underscore.intellisense.js
+
+* Javascript Documentation for the amazing [Underscore](http://underscorejs.org/) library.
 
 
   [1]: http://msdn.microsoft.com/en-us/library/bb385682.aspx
