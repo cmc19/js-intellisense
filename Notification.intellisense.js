@@ -40,3 +40,10 @@ Notification.requestPermission = function (callback) {
     if (typeof callback === 'Function')
         callback("");
 }
+intellisense.annotate(Notification, {
+    // A string representing the current permission to display notifications. 
+    // Possible value are: denied (the user refuses to have notifications displayed), 
+    // granted (the user accepts to have notifications displayed), or default
+    // (the user choice is unknown and therefore the browser will act as if the value was denied).
+    permission: ''
+});
