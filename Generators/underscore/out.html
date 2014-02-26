@@ -1,0 +1,389 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Blank HTML 5 Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+    <style type="text/css">
+        /* Css goes here */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Body Content Goes Here</h1>
+    </div>
+    <pre>        <code></code>    </pre>
+    <!-- Javascript at end of page so that it loads faster. -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/json2/20130526/json2.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/dustjs-linkedin/2.0.0/dust-full.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore.js"></script>
+    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script type="text/html" id="template">
+        {#.}
+        <div>
+            <h3>{attr}</h3>
+            <textarea class="form-control">{text}</textarea>
+        </div>
+        {/.}
+    </script>
+    <script type="text/javascript">
+
+        function getParamNames(func) {
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="func" type="" optional="false"></param>
+            /// <returns type=""></returns>
+            //http://stackoverflow.com/a/9924463/358661
+            var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+            var fnStr = func.toString().replace(STRIP_COMMENTS, '')
+            var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(/([^\s,]+)/g)
+            if (result === null)
+                result = []
+            return result
+        }
+        $(function () {
+            var compiled = dust.compile($('#template').html(), 'temp');
+            dust.loadSource(compiled);
+            _.each(data, function (d) {
+
+                d.body = '/// ' + d.body
+                    .replace(/\n/g, ' ')
+                    .replace(/<tt>/g, '"')
+                    .replace(/<\/tt>/g, '"')
+                    .replace(/\./g, '.\n')
+                    .replace(/  /g, ' ').replace(/  /g, ' ').trim()
+                    .replace(/\n /g, '\n/// ');
+                d.text = 'intellisense.annotate(_.' + d.attr + ', function(';
+                var fn = _[d.attr];
+                if (typeof fn === 'function') {
+                    var params = getParamNames(fn);
+                    var x = 0;
+                    _.each(params, function (o) {
+                        if (x != 0) d.text += ', ';
+                        d.text += o;
+                        x++;
+                    });
+                    d.text += '){\n';
+                    d.text += '/// <summary>\n'
+                    d.text += d.body;
+                    d.text += '\n/// </summary>';
+                    _.each(params, function (o) {
+                        d.text += '\n/// <param name="' + o + '" type="" optional="false"></param>';
+                    });
+
+                    d.text += '\n});';
+                } else
+                    d.text = '\n\n//error on ' + d.attr + '\n\n';
+            });
+            dust.render('temp', data, function (err, out) {
+                $('.container').html(out);
+            });
+
+            $('body').append('<textarea class="form-control">' + $('textarea').text() + '</textarea>');
+            $('textarea').click(function () {
+                $(this).select();
+            });
+        });
+    </script>
+    <script>
+        var data = [{
+            "attr": "each",
+            "body": "     Iterates over a  of elements, yielding each in turn to an  function. The  is bound to the  object, if one is passed. Each invocation of  is called with three arguments: <tt>(element, index, list)</tt>. If  is a JavaScript object, 's arguments will be <tt>(value, key, list)</tt>. Delegates to the native  function if it exists, and returns the original  for chaining.\n      "
+        }, {
+            "attr": "map",
+            "body": "     Produces a new array of values by mapping each value in  through a transformation function (). If the native  method exists, it will be used instead. If  is a JavaScript object, 's arguments will be <tt>(value, key, list)</tt>.\n      "
+        }, {
+            "attr": "reduce",
+            "body": "     Also known as  and ,  boils down a  of values into a single value.  is the initial state of the reduction, and each successive step of it should be returned by . The iterator is passed four arguments: the <tt>memo</tt>, then the <tt>value</tt> and <tt>index</tt> (or key) of the iteration, and finally a reference to the entire <tt>list</tt>.\n      "
+        }, {
+            "attr": "reduceRight",
+            "body": "     The right-associative version of . Delegates to the JavaScript 1.8 version of , if it exists.  is not as useful in JavaScript as it would be in a language with lazy evaluation.\n      "
+        }, {
+            "attr": "find",
+            "body": "     Looks through each value in the , returning the first one that passes a truth test (), or <tt>undefined</tt> if no value passes the test. The function returns as soon as it finds an acceptable element, and doesn't traverse the entire list.\n      "
+        }, {
+            "attr": "filter",
+            "body": "     Looks through each value in the , returning an array of all the values that pass a truth test (). Delegates to the native  method, if it exists.\n      "
+        }, {
+            "attr": "where",
+            "body": "    Looks through each value in the , returning an array of all the values that contain all of the key-value pairs listed in .\n      "
+        }, {
+            "attr": "findWhere",
+            "body": "    Looks through the  and returns the <i>first</i> value that matches all of the key-value pairs listed in .\n      "
+        }, {
+            "attr": "reject",
+            "body": "    Returns the values in  without the elements that the truth test () passes. The opposite of .\n      "
+        }, {
+            "attr": "every",
+            "body": "     Returns <i>true</i> if all of the values in the  pass the  truth test. Delegates to the native method , if present.\n      "
+        }, {
+            "attr": "some",
+            "body": "     Returns <i>true</i> if any of the values in the  pass the  truth test. Short-circuits and stops traversing the list if a true element is found. Delegates to the native method , if present.\n      "
+        }, {
+            "attr": "contains",
+            "body": "     Returns <i>true</i> if the  is present in the . Uses  internally, if  is an Array.\n      "
+        }, {
+            "attr": "invoke",
+            "body": "    Calls the method named by  on each value in the . Any extra arguments passed to  will be forwarded on to the method invocation.\n      "
+        }, {
+            "attr": "pluck",
+            "body": "    A convenient version of what is perhaps the most common use-case for : extracting a list of property values.\n      "
+        }, {
+            "attr": "max",
+            "body": "    Returns the maximum value in . If an  function is provided, it will be used on each value to generate the criterion by which the value is ranked.\n      "
+        }, {
+            "attr": "min",
+            "body": "    Returns the minimum value in . If an  function is provided, it will be used on each value to generate the criterion by which the value is ranked.\n      "
+        }, {
+            "attr": "sortBy",
+            "body": "    Returns a (stably) sorted copy of , ranked in ascending order by the results of running each value through . Iterator may also be the string name of the property to sort by (eg. <tt>length</tt>).\n      "
+        }, {
+            "attr": "groupBy",
+            "body": "    Splits a collection into sets, grouped by the result of running each value through . If  is a string instead of a function, groups by the property named by  on each of the values.\n      "
+        }, {
+            "attr": "indexBy",
+            "body": "    Given a , and an  function that returns a key for each element in the list (or a property name), returns an object with an index of each item. Just like <a href=\"#groupBy\">groupBy</a>, but for when you know your keys are unique.\n      "
+        }, {
+            "attr": "countBy",
+            "body": "    Sorts a list into groups and returns a count for the number of objects in each group. Similar to <tt>groupBy</tt>, but instead of returning a list of values, returns a count for the number of values in that group.\n      "
+        }, {
+            "attr": "shuffle",
+            "body": "    Returns a shuffled copy of the , using a version of the <a href=\"http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle\">Fisher-Yates shuffle</a>.\n      "
+        }, {
+            "attr": "sample",
+            "body": "    Produce a random sample from the . Pass a number to return  random elements from the list. Otherwise a single random item will be returned.\n      "
+        }, {
+            "attr": "toArray",
+            "body": "    Creates a real Array from the  (anything that can be iterated over).  Useful for transmuting the  object.\n      "
+        }, {
+            "attr": "size",
+            "body": "    Return the number of values in the .\n      "
+        }, {
+            "attr": "first",
+            "body": "     Returns the first element of an . Passing  will return the first  elements of the array.\n      "
+        }, {
+            "attr": "initial",
+            "body": "    Returns everything but the last entry of the array. Especially useful on the arguments object. Pass  to exclude the last  elements from the result.\n      "
+        }, {
+            "attr": "last",
+            "body": "    Returns the last element of an . Passing  will return the last  elements of the array.\n      "
+        }, {
+            "attr": "rest",
+            "body": "     Returns the  of the elements in an array. Pass an  to return the values of the array from that index onward.\n      "
+        }, {
+            "attr": "compact",
+            "body": "    Returns a copy of the  with all falsy values removed. In JavaScript, <i>false</i>, <i>null</i>, <i>0</i>, <i>\"\"</i>, <i>undefined</i> and <i>NaN</i> are all falsy.\n      "
+        }, {
+            "attr": "flatten",
+            "body": "    Flattens a nested  (the nesting can be to any depth). If you pass , the array will only be flattened a single level.\n      "
+        }, {
+            "attr": "without",
+            "body": "    Returns a copy of the  with all instances of the  removed.\n      "
+        }, {
+            "attr": "partition",
+            "body": "    Split  into two arrays: one whose elements all satisfy  and one whose elements all do not satisfy .\n      "
+        }, {
+            "attr": "union",
+            "body": "    Computes the union of the passed-in : the list of unique items, in order, that are present in one or more of the .\n      "
+        }, {
+            "attr": "intersection",
+            "body": "    Computes the list of values that are the intersection of all the . Each value in the result is present in each of the .\n      "
+        }, {
+            "attr": "difference",
+            "body": "    Similar to , but returns the values from  that are not present in the  arrays.\n      "
+        }, {
+            "attr": "uniq",
+            "body": "     Produces a duplicate-free version of the , using <i>===</i> to test object equality. If you know in advance that the  is sorted, passing <i>true</i> for  will run a much faster algorithm. If you want to compute unique items based on a transformation, pass an  function.\n      "
+        }, {
+            "attr": "zip",
+            "body": "    Merges together the values of each of the  with the values at the corresponding position. Useful when you have separate data sources that are coordinated through matching array indexes. If you're working with a matrix of nested arrays, <tt>_.zip.apply</tt> can transpose the matrix in a similar fashion.\n      "
+        }, {
+            "attr": "object",
+            "body": "    Converts arrays into objects. Pass either a single list of <tt>[key, value]</tt> pairs, or a list of keys, and a list of values. If duplicate keys exist, the last value wins.\n      "
+        }, {
+            "attr": "indexOf",
+            "body": "    Returns the index at which  can be found in the , or <i>-1</i> if value is not present in the . Uses the native  function unless it's missing. If you're working with a large array, and you know that the array is already sorted, pass <tt>true</tt> for  to use a faster binary search ... or, pass a number as the third argument in order to look for the first matching value in the array after the given index.\n      "
+        }, {
+            "attr": "lastIndexOf",
+            "body": "    Returns the index of the last occurrence of  in the , or <i>-1</i> if value is not present. Uses the native  function if possible. Pass  to start your search at a given index.\n      "
+        }, {
+            "attr": "sortedIndex",
+            "body": "    Uses a binary search to determine the index at which the  <i>should</i> be inserted into the  in order to maintain the 's sorted order. If an  function is provided, it will be used to compute the sort ranking of each value, including the  you pass. Iterator may also be the string name of the property to sort by (eg. <tt>length</tt>).\n      "
+        }, {
+            "attr": "range",
+            "body": "    A function to create flexibly-numbered lists of integers, handy for <tt>each</tt> and <tt>map</tt> loops. , if omitted, defaults to <i>0</i>;  defaults to <i>1</i>. Returns a list of integers from  to , incremented (or decremented) by , exclusive. Note that ranges that  before they  are considered to be zero-length instead of negative — if you'd like a negative range, use a negative .\n      "
+        }, {
+            "attr": "bind",
+            "body": "    Bind a  to an , meaning that whenever the function is called, the value of <i>this</i> will be the . Optionally, pass  to the  to pre-fill them, also known as .\n      "
+        }, {
+            "attr": "bindAll",
+            "body": "    Binds a number of methods on the , specified by , to be run in the context of that object whenever they are invoked. Very handy for binding functions that are going to be used as event handlers, which would otherwise be invoked with a fairly useless <i>this</i>.  are required.\n      "
+        }, {
+            "attr": "partial",
+            "body": "    Partially apply a function by filling in any number of its , <i>without</i> changing its dynamic <tt>this</tt> value. A close cousin of <a href=\"#bind\">bind</a>. You may pass <tt>_</tt> in your list of   to specify an argument that should not be pre-filled, but left open to supply at call-time.\n      "
+        }, {
+            "attr": "memoize",
+            "body": "    Memoizes a given  by caching the computed result. Useful for speeding up slow-running computations. If passed an optional , it will be used to compute the hash key for storing the result, based on the arguments to the original function. The default  just uses the first argument to the memoized function as the key.\n      "
+        }, {
+            "attr": "delay",
+            "body": "    Much like , invokes  after  milliseconds. If you pass the optional , they will be forwarded on to the  when it is invoked.\n      "
+        }, {
+            "attr": "defer",
+            "body": "    Defers invoking the  until the current call stack has cleared, similar to using  with a delay of 0. Useful for performing expensive computations or HTML rendering in chunks without blocking the UI thread from updating. If you pass the optional , they will be forwarded on to the  when it is invoked.\n      "
+        }, {
+            "attr": "throttle",
+            "body": "    Creates and returns a new, throttled version of the passed function, that, when invoked repeatedly, will only actually call the original function at most once per every  milliseconds. Useful for rate-limiting events that occur faster than you can keep up with.\n      "
+        }, {
+            "attr": "debounce",
+            "body": "    Creates and returns a new debounced version of the passed function which will postpone its execution until after  milliseconds have elapsed since the last time it was invoked. Useful for implementing behavior that should only happen <i>after</i> the input has stopped arriving. For example: rendering a preview of a Markdown comment, recalculating a layout after the window has stopped being resized, and so on.\n      "
+        }, {
+            "attr": "once",
+            "body": "    Creates a version of the function that can only be called one time. Repeated calls to the modified function will have no effect, returning the value from the original call. Useful for initialization functions, instead of having to set a boolean flag and then check it later.\n      "
+        }, {
+            "attr": "after",
+            "body": "    Creates a version of the function that will only be run after first being called  times. Useful for grouping asynchronous responses, where you want to be sure that all the async calls have finished, before proceeding.\n      "
+        }, {
+            "attr": "now",
+            "body": "    Returns an integer timestamp for the current time, using the fastest method available in the runtime. Useful for implementing timing/animation functions.\n      "
+        }, {
+            "attr": "wrap",
+            "body": "    Wraps the first  inside of the  function, passing it as the first argument. This allows the  to execute code before and after the  runs, adjust the arguments, and execute it conditionally.\n      "
+        }, {
+            "attr": "compose",
+            "body": "    Returns the composition of a list of , where each function consumes the return value of the function that follows. In math terms, composing the functions <i>f()</i>, <i>g()</i>, and <i>h()</i> produces <i>f(g(h()))</i>.\n      "
+        }, {
+            "attr": "keys",
+            "body": "    Retrieve all the names of the 's properties.\n      "
+        }, {
+            "attr": "values",
+            "body": "    Return all of the values of the 's properties.\n      "
+        }, {
+            "attr": "pairs",
+            "body": "    Convert an object into a list of <tt>[key, value]</tt> pairs.\n      "
+        }, {
+            "attr": "invert",
+            "body": "    Returns a copy of the  where the keys have become the values and the values the keys. For this to work, all of your object's values should be unique and string serializable.\n      "
+        }, {
+            "attr": "object-functions",
+            "body": "     Returns a sorted list of the names of every method in an object — that is to say, the name of every function property of the object.\n      "
+        }, {
+            "attr": "extend",
+            "body": "    Copy all of the properties in the  objects over to the  object, and return the  object. It's in-order, so the last source will override properties of the same name in previous arguments.\n      "
+        }, {
+            "attr": "pick",
+            "body": "    Return a copy of the , filtered to only have values for the whitelisted  (or array of valid keys).\n      "
+        }, {
+            "attr": "omit",
+            "body": "    Return a copy of the , filtered to omit the blacklisted  (or array of keys).\n      "
+        }, {
+            "attr": "defaults",
+            "body": "    Fill in <tt>undefined</tt> properties in  with values from the  objects, and return the . As soon as the property is filled, further defaults will have no effect.\n      "
+        }, {
+            "attr": "clone",
+            "body": "    Create a shallow-copied clone of the . Any nested objects or arrays will be copied by reference, not duplicated.\n      "
+        }, {
+            "attr": "tap",
+            "body": "    Invokes  with the , and then returns . The primary purpose of this method is to \"tap into\" a method chain, in order to perform operations on intermediate results within the chain.\n      "
+        }, {
+            "attr": "has",
+            "body": "    Does the object contain the given key? Identical to <tt>object.hasOwnProperty(key)</tt>, but uses a safe reference to the <tt>hasOwnProperty</tt> function, in case it's been <a href=\"http://www.devthought.com/2012/01/18/an-object-is-not-a-hash/\">overridden accidentally</a>.\n      "
+        }, {
+            "attr": "property",
+            "body": "    Returns a function that will itself return the <tt>key</tt> property of any passed-in object.\n      "
+        }, {
+            "attr": "matches",
+            "body": "    Returns a predicate function that will tell you if a passed in object contains all of the key/value properties present in .\n      "
+        }, {
+            "attr": "isEqual",
+            "body": "    Performs an optimized deep comparison between the two objects, to determine if they should be considered equal.\n      "
+        }, {
+            "attr": "isEmpty",
+            "body": "    Returns <i>true</i> if  contains no values (no enumerable own-properties).\n      "
+        }, {
+            "attr": "isElement",
+            "body": "    Returns <i>true</i> if  is a DOM element.\n      "
+        }, {
+            "attr": "isArray",
+            "body": "    Returns <i>true</i> if  is an Array.\n      "
+        }, {
+            "attr": "isObject",
+            "body": "    Returns <i>true</i> if  is an Object. Note that JavaScript arrays and functions are objects, while (normal) strings and numbers are not.\n      "
+        }, {
+            "attr": "isArguments",
+            "body": "    Returns <i>true</i> if  is an Arguments object.\n      "
+        }, {
+            "attr": "isFunction",
+            "body": "    Returns <i>true</i> if  is a Function.\n      "
+        }, {
+            "attr": "isString",
+            "body": "    Returns <i>true</i> if  is a String.\n      "
+        }, {
+            "attr": "isNumber",
+            "body": "    Returns <i>true</i> if  is a Number (including <tt>NaN</tt>).\n      "
+        }, {
+            "attr": "isFinite",
+            "body": "    Returns <i>true</i> if  is a finite Number.\n      "
+        }, {
+            "attr": "isBoolean",
+            "body": "    Returns <i>true</i> if  is either <i>true</i> or <i>false</i>.\n      "
+        }, {
+            "attr": "isDate",
+            "body": "    Returns <i>true</i> if  is a Date.\n      "
+        }, {
+            "attr": "isRegExp",
+            "body": "    Returns <i>true</i> if  is a RegExp.\n      "
+        }, {
+            "attr": "isNaN",
+            "body": "    Returns <i>true</i> if  is <i>NaN</i>.  Note: this is not the same as the native  function, which will also return true for many other not-number values, such as <tt>undefined</tt>.\n      "
+        }, {
+            "attr": "isNull",
+            "body": "    Returns <i>true</i> if the value of  is <i>null</i>.\n      "
+        }, {
+            "attr": "isUndefined",
+            "body": "    Returns <i>true</i> if  is <i>undefined</i>.\n      "
+        }, {
+            "attr": "noConflict",
+            "body": "    Give control of the \"_\" variable back to its previous owner. Returns a reference to the  object.\n      "
+        }, {
+            "attr": "identity",
+            "body": "    Returns the same value that is used as the argument. In math: <tt>f(x) = x</tt>  This function looks useless, but is used throughout Underscore as a default iterator.\n      "
+        }, {
+            "attr": "constant",
+            "body": "    Creates a function that returns the same value that is used as the  argument of <tt>_.constant</tt>.\n      "
+        }, {
+            "attr": "times",
+            "body": "    Invokes the given iterator function  times. Each invocation of  is called with an <tt>index</tt> argument. Produces an array of the returned values.   <i>Note: this example uses the <a href=\"#chaining\">chaining syntax</a></i>.\n      "
+        }, {
+            "attr": "random",
+            "body": "    Returns a random integer between  and , inclusive. If you only pass one argument, it will return a number between <tt>0</tt> and that number.\n      "
+        }, {
+            "attr": "mixin",
+            "body": "    Allows you to extend Underscore with your own utility functions. Pass a hash of <tt>{name: function}</tt> definitions to have your functions added to the Underscore object, as well as the OOP wrapper.\n      "
+        }, {
+            "attr": "uniqueId",
+            "body": "    Generate a globally-unique id for client-side models or DOM elements that need one. If  is passed, the id will be appended to it.\n      "
+        }, {
+            "attr": "escape",
+            "body": "    Escapes a string for insertion into HTML, replacing <tt>&amp;</tt>, <tt>&lt;</tt>, <tt>&gt;</tt>, <tt>\"</tt>, and <tt>'</tt> characters.\n      "
+        }, {
+            "attr": "unescape",
+            "body": "    The opposite of <a href=\"#escape\"></a>, replaces <tt>&amp;amp;</tt>, <tt>&amp;lt;</tt>, <tt>&amp;gt;</tt>, <tt>&amp;quot;</tt>, and <tt>&amp;#x27;</tt> with their unescaped counterparts.\n      "
+        }, {
+            "attr": "result",
+            "body": "    If the value of the named  is a function then invoke it with the  as context; otherwise, return it.\n      "
+        }, {
+            "attr": "template",
+            "body": "    Compiles JavaScript templates into functions that can be evaluated for rendering. Useful for rendering complicated bits of HTML from JSON data sources. Template functions can both interpolate variables, using <tt>&lt;%= … %&gt;</tt>, as well as execute arbitrary JavaScript code, with <tt>&lt;% … %&gt;</tt>. If you wish to interpolate a value, and have it be HTML-escaped, use <tt>&lt;%- … %&gt;</tt> When you evaluate a template function, pass in a  object that has properties corresponding to the template's free variables. If you're writing a one-off, you can pass the  object as the second parameter to  in order to render immediately instead of returning a template function.  The  argument should be a hash containing any <tt>_.templateSettings</tt> that should be overridden.\n      "
+        }, {
+            "attr": "chain",
+            "body": "    Returns a wrapped object. Calling methods on this object will continue to return wrapped objects until <tt>value</tt> is used.\n      "
+        }, {
+            "attr": "value",
+            "body": "    Extracts the value of a wrapped object.\n      "
+        }];
+    </script>
+</body>
+</html>
